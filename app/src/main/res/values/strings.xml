@@ -6,6 +6,12 @@
         <item>France</item>
         <item>Arabian</item>
     </string-array>
+    <string-array name="language_array2">
+        <item>English</item>
+        <item>Persian</item>
+        <item>France</item>
+        <item>Arabian</item>
+    </string-array>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

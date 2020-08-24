@@ -28,10 +28,12 @@
 
         <TextView
             android:id="@+id/textView_result"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="159dp"
+            android:layout_height="40dp"
             android:layout_gravity="center"
-            android:text="TextView" />
+            android:gravity="center"
+            android:textColor="#000000"
+            android:textSize="24sp" />
 
     </androidx.cardview.widget.CardView>
 
@@ -44,14 +46,14 @@
         android:paddingStart="50dp"
         android:paddingEnd="30dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/imageView2"
+        app:layout_constraintEnd_toStartOf="@+id/image_view_replace"
         app:layout_constraintHorizontal_bias="0.202"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0" />
 
     <ImageView
-        android:id="@+id/imageView2"
+        android:id="@+id/image_view_replace"
         android:layout_width="49dp"
         android:layout_height="50dp"
         android:layout_marginStart="8dp"
@@ -74,7 +76,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toEndOf="@+id/imageView2"
+        app:layout_constraintStart_toEndOf="@+id/image_view_replace"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0" />
 
@@ -87,7 +89,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView2"
+        app:layout_constraintTop_toBottomOf="@+id/image_view_replace"
         app:layout_constraintVertical_bias="0.0" />
 
     <MultiAutoCompleteTextView

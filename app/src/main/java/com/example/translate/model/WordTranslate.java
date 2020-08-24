@@ -2,7 +2,7 @@ package com.example.translate.model;
 
 import java.util.UUID;
 
-public class Word {
+public class WordTranslate {
     private String mPersian;
     private String mEnglish;
     private String mFrance;
@@ -45,15 +45,15 @@ public class Word {
         mArabian = arabian;
     }
 
-    public Word() {
+    public WordTranslate() {
         mUUID= UUID.randomUUID();
     }
 
-    public Word(String persian, String english, String france, String arabian) {
-        this();
+    public WordTranslate(String persian, String english, String france, String arabian ) {
         mPersian = persian;
         mEnglish = english;
         mFrance = france;
         mArabian = arabian;
+        mUUID = UUID.randomUUID();
     }
 }
