@@ -4,8 +4,11 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+
 import static com.example.translate.database.TranslateDBSchema.WordTable.*;
+
 import com.example.translate.database.TranslateBaseHelper;
+import com.example.translate.database.TranslateDBSchema;
 import com.example.translate.database.cursorwrapper.WordCursorWrapper;
 import com.example.translate.model.WordTranslate;
 
@@ -19,7 +22,7 @@ public class WordDBRepository implements IRepository<WordTranslate> {
     private SQLiteDatabase mSQLiteDatabase;
     private static Context mContext;
 
-    public static WordDBRepository getInstance(Context context){
+    public static WordDBRepository getInstance(Context context) {
         mContext = context.getApplicationContext();
 
         if (sWordDBRepository == null)
@@ -35,20 +38,19 @@ public class WordDBRepository implements IRepository<WordTranslate> {
     @Override
     public void insert(WordTranslate wordTranslate) {
         ContentValues values = getWordContentValues(wordTranslate);
-        mSQLiteDatabase.insert(NAME , null , values);
+        mSQLiteDatabase.insert(NAME, null, values);
     }
 
     @Override
     public WordTranslate get(UUID uuid) {
-        String where  = COLS.UUID + "=?";
+        String where = COLS.UUID + "=?";
         String[] whereArgs = {uuid.toString()};
-        WordCursorWrapper cursorWrapper = queryWord(where,whereArgs);
+        WordCursorWrapper cursorWrapper = queryWord(where, whereArgs);
 
-        try{
+        try {
             cursorWrapper.moveToFirst();
             return cursorWrapper.getWord();
-        }
-        finally {
+        } finally {
             cursorWrapper.close();
         }
     }
@@ -56,16 +58,16 @@ public class WordDBRepository implements IRepository<WordTranslate> {
     @Override
     public List<WordTranslate> getList() {
         List<WordTranslate> wordTranslates = new ArrayList<>();
-        WordCursorWrapper cursorWrapper = queryWord(null,null);
+        WordCursorWrapper cursorWrapper = queryWord(null, null);
 
         try {
             cursorWrapper.moveToFirst();
 
-            while (!cursorWrapper.isAfterLast()){
+            while (!cursorWrapper.isAfterLast()) {
                 wordTranslates.add(cursorWrapper.getWord());
                 cursorWrapper.moveToNext();
             }
-        }finally {
+        } finally {
             cursorWrapper.close();
         }
         return wordTranslates;
@@ -73,38 +75,58 @@ public class WordDBRepository implements IRepository<WordTranslate> {
 
     @Override
     public void delete(WordTranslate wordTranslate) {
-        String where  = COLS.UUID + "=?";
+        String where = COLS.UUID + "=?";
         String[] whereArgs = {wordTranslate.getUUID().toString()};
-        mSQLiteDatabase.delete(NAME , where , whereArgs );
+        mSQLiteDatabase.delete(NAME, where, whereArgs);
     }
 
     @Override
     public void update(WordTranslate wordTranslate) {
         ContentValues values = getWordContentValues(wordTranslate);
-        String where  = COLS.UUID + "=?";
+        String where = COLS.UUID + "=?";
         String[] whereArgs = {wordTranslate.getUUID().toString()};
-        mSQLiteDatabase.update(NAME ,values,where , whereArgs );
+        mSQLiteDatabase.update(NAME, values, where, whereArgs);
     }
 
-    private ContentValues getWordContentValues(WordTranslate wordTranslate){
+    public List<WordTranslate> findMeaning( String where) {
+        List<WordTranslate> words = new ArrayList<>();
+
+        WordCursorWrapper cursorWrapper = queryWord(where, null);
+
+        try {
+            cursorWrapper.moveToFirst();
+            while (!cursorWrapper.isAfterLast()) {
+                words.add(cursorWrapper.getWord());
+                cursorWrapper.moveToNext();
+            }
+            return words;
+        }finally {
+            cursorWrapper.close();
+        }
+
+
+    }
+
+    private ContentValues getWordContentValues(WordTranslate wordTranslate) {
         ContentValues values = new ContentValues();
-        values.put(COLS.PERSIAN , wordTranslate.getPersian());
-        values.put(COLS.ENGLISH , wordTranslate.getEnglish());
-        values.put(COLS.FRANCE , wordTranslate.getFrance());
-        values.put(COLS.ARABIAN , wordTranslate.getArabian());
-        values.put(COLS.UUID , wordTranslate.getUUID().toString());
+        values.put(COLS.PERSIAN, wordTranslate.getPersian());
+        values.put(COLS.ENGLISH, wordTranslate.getEnglish());
+        values.put(COLS.FRANCE, wordTranslate.getFrance());
+        values.put(COLS.ARABIAN, wordTranslate.getArabian());
+        values.put(COLS.UUID, wordTranslate.getUUID().toString());
         return values;
     }
 
-    private WordCursorWrapper queryWord(String where , String[] whereArgs){
-        Cursor cursor = mSQLiteDatabase.query(NAME ,
-                null ,
-                where ,
-                whereArgs ,
-                null ,
-                null ,
+    private WordCursorWrapper queryWord(String where, String[] whereArgs) {
+        Cursor cursor = mSQLiteDatabase.query(NAME,
+                null,
+                where,
+                whereArgs,
+                null,
+                null,
                 null);
 
         return new WordCursorWrapper(cursor);
     }
+
 }
