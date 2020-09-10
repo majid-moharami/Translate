@@ -1,13 +1,17 @@
 package com.example.translate.model;
 
+import java.io.Serializable;
 import java.util.UUID;
 
-public class WordTranslate {
+public class WordTranslate implements Serializable {
     private String mPersian;
     private String mEnglish;
     private String mFrance;
     private String mArabian;
     private UUID mUUID;
+
+    public WordTranslate(String s) {
+    }
 
     public UUID getUUID() {
         return mUUID;
@@ -55,5 +59,12 @@ public class WordTranslate {
         mFrance = france;
         mArabian = arabian;
         mUUID = UUID.randomUUID();
+    }
+    public WordTranslate(String persian, String english, String france, String arabian,UUID uuid ) {
+        mPersian = persian;
+        mEnglish = english;
+        mFrance = france;
+        mArabian = arabian;
+        mUUID = uuid;
     }
 }

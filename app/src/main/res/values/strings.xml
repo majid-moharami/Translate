@@ -15,4 +15,15 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="label">persian</string>
+    <string name="persian">Persian</string>
+    <string name="english">English</string>
+    <string name="france">France</string>
+    <string name="arabian">Arabian</string>
+    <string name="add_word">Add Word</string>
+    <string name="save">Save</string>
+    <string name="cancel">cancel</string>
+    <string name="share_word">persian : %1$s
+    English : %2$s
+    France : %3$s
+    Arabian : %4$s</string>
 </resources>

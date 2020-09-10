@@ -24,7 +24,7 @@ public class WordCursorWrapper extends CursorWrapper {
         String france = getString(getColumnIndex(TranslateDBSchema.WordTable.COLS.FRANCE));
         String arabian = getString(getColumnIndex(TranslateDBSchema.WordTable.COLS.ARABIAN));
         String uuid = getString(getColumnIndex(TranslateDBSchema.WordTable.COLS.UUID));
-        WordTranslate wordTranslate = new WordTranslate(persian , english , france , arabian);
+        WordTranslate wordTranslate = new WordTranslate(persian , english , france , arabian,UUID.fromString(uuid));
         //TODO make counstractor
         return wordTranslate;
     }

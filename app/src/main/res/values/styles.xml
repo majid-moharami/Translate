@@ -5,6 +5,12 @@
         <item name="colorPrimary">#3D5AFE</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorControlNormal">#838383</item>
+        <item name="colorControlActivated">#D50000</item>
     </style>
 
+
+    <style name="MyAppearance" parent="TextAppearance.AppCompat">
+        <item name="android:textColor">#DD2C00</item>
+    </style>
 </resources>

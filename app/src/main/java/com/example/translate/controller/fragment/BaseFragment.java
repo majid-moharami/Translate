@@ -1,14 +1,23 @@
 package com.example.translate.controller.fragment;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -32,9 +41,13 @@ import java.util.List;
 
 public class BaseFragment extends Fragment implements AdapterView.OnItemSelectedListener {
 
+    public static final int REQUEST_CODE_WORD_DETAIL_DIALOG = 1;
+    public static final int REQUEST_CODE_ADD_WORD_DIALOG = 1;
+    public static final String SAVE_INSTANCE_ORIGIN_STATE = "origin_state";
+    public static final String SAVE_INSTANCE_DES_STATE = "des_state";
+    public static final String SAVE_ENTERED_TEXT = "entered_text";
     private Button mButtonTranslate;
     private WordDBRepository mRepository;
-    private List<WordTranslate> mWordList;
     private StateOfTranslate mOriginState, mDesState;
     private TextView mResultWord;
     private EditText mEnterText;
@@ -42,6 +55,8 @@ public class BaseFragment extends Fragment implements AdapterView.OnItemSelected
     private ImageView mReplace;
     private RecyclerView mRecyclerView;
     private WordAdapter mWordAdapter;
+    List<WordTranslate> mMeaningWord = new ArrayList<>();
+    String mWhere;
 
     public static BaseFragment newInstance() {
         BaseFragment fragment = new BaseFragment();
@@ -54,7 +69,8 @@ public class BaseFragment extends Fragment implements AdapterView.OnItemSelected
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mRepository = WordDBRepository.getInstance(getActivity());
-        mWordList = mRepository.getList();
+        if (savedInstanceState==null)
+            setHasOptionsMenu(true);
     }
 
     @Override
@@ -63,17 +79,115 @@ public class BaseFragment extends Fragment implements AdapterView.OnItemSelected
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_base, container, false);
         findViews(view);
+        if (savedInstanceState!=null){
+            String origin = savedInstanceState.getString(SAVE_INSTANCE_ORIGIN_STATE);
+            String des = savedInstanceState.getString(SAVE_INSTANCE_DES_STATE);
+            mEnterText.setText(savedInstanceState.getString(SAVE_ENTERED_TEXT));
+            switch (origin){
+                case "PERSIAN" :
+                    mOriginState=StateOfTranslate.PERSIAN;
+                    mSpinnerOrigin.setSelection(0);
+                    break;
+                case "ENGLISH" :
+                    mOriginState=StateOfTranslate.ENGLISH;
+                    mSpinnerOrigin.setSelection(1);
+                    break;
+                case "FRANCE" :
+                    mOriginState=StateOfTranslate.FRANCE;
+                    mSpinnerOrigin.setSelection(2);
+                    break;
+                case "ARABIAN" :
+                    mOriginState=StateOfTranslate.ARABIAN;
+                    mSpinnerOrigin.setSelection(3);
+                    break;
+            }
+            switch (des){
+                case "PERSIAN" :
+                    mDesState=StateOfTranslate.PERSIAN;
+                    mSpinnerDestination.setSelection(0);
+                    break;
+                case "ENGLISH" :
+                    mDesState=StateOfTranslate.ENGLISH;
+                    mSpinnerDestination.setSelection(1);
+                    break;
+                case "FRANCE" :
+                    mDesState=StateOfTranslate.FRANCE;
+                    mSpinnerDestination.setSelection(2);
+                    break;
+                case "ARABIAN" :
+                    mDesState=StateOfTranslate.ARABIAN;
+                    mSpinnerDestination.setSelection(3);
+                    break;
+            }
+
+
+        }else {
+            updateSubtitle();
+            setSpinnerOrigin(view);
+            setSpinnerDestination(view);
+        }
         allListener();
-        setSpinnerOrigin(view);
-        setSpinnerDestination(view);
+
 
         mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 1));
-
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        //updateSubtitle();
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(SAVE_INSTANCE_ORIGIN_STATE,mOriginState.toString());
+        outState.putString(SAVE_INSTANCE_DES_STATE,mDesState.toString());
+        outState.putString(SAVE_ENTERED_TEXT,mEnterText.getText().toString());
+    }
+
+    private void updateSubtitle() {
+        AppCompatActivity activity = (AppCompatActivity) getActivity();
+
+        String numberOfCrimes = mRepository.getList().size() + "";
+
+        activity.getSupportActionBar().setSubtitle(numberOfCrimes);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode != Activity.RESULT_OK || data == null)
+            return;
+
+        if (requestCode == REQUEST_CODE_WORD_DETAIL_DIALOG) {
+            mMeaningWord = mRepository.findMeaning(mWhere);
+            updateUI();
+        }
+    }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.translate_menu, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.add_icon_menu:
+                AddWordDialogFragment addWordDialogFragment = AddWordDialogFragment.newInstance();
+                addWordDialogFragment.setTargetFragment(BaseFragment.this, REQUEST_CODE_ADD_WORD_DIALOG);
+                addWordDialogFragment.show(getFragmentManager(), "addDialog");
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
     private void findViews(View view) {
-        mButtonTranslate = view.findViewById(R.id.button_translate);
         mEnterText = view.findViewById(R.id.editText_enter_text);
         mSpinnerDestination = view.findViewById(R.id.spinner_Destination);
         mSpinnerOrigin = view.findViewById(R.id.spinner_origin);
@@ -83,37 +197,43 @@ public class BaseFragment extends Fragment implements AdapterView.OnItemSelected
     }
 
     private void allListener() {
-        mButtonTranslate.setOnClickListener(new View.OnClickListener() {
+
+        mEnterText.addTextChangedListener(new TextWatcher() {
             @Override
-            public void onClick(View v) {
-                MediaPlayer mediaPlayer = MediaPlayer.create(getActivity(), R.raw.multimedia_button_click_005);
-                mediaPlayer.start();
-                List<WordTranslate> meaningWord = new ArrayList<>();
-                String inputWord = mEnterText.getText().toString();
-                String where = TranslateDBSchema.WordTable.COLS.PERSIAN + " LIKE ?";
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String inputWord = s.toString();
                 switch (mOriginState) {
                     case PERSIAN:
-                        where = TranslateDBSchema.WordTable.COLS.PERSIAN + " LIKE '%" + inputWord + "%'";
+                        mWhere = TranslateDBSchema.WordTable.COLS.PERSIAN + " LIKE '" + inputWord + "%'";
                         break;
                     case ENGLISH:
-                        where = TranslateDBSchema.WordTable.COLS.ENGLISH + " LIKE '%" + inputWord + "%'";
+                        mWhere = TranslateDBSchema.WordTable.COLS.ENGLISH + " LIKE '" + inputWord + "%'";
                         break;
                     case FRANCE:
-                        where = TranslateDBSchema.WordTable.COLS.FRANCE + " LIKE '%" + inputWord + "%'";
+                        mWhere = TranslateDBSchema.WordTable.COLS.FRANCE + " LIKE '" + inputWord + "%'";
                         break;
                     case ARABIAN:
-                        where = TranslateDBSchema.WordTable.COLS.ARABIAN + " LIKE '%" + inputWord + "%'";
+                        mWhere = TranslateDBSchema.WordTable.COLS.ARABIAN + " LIKE '" + inputWord + "%'";
                         break;
                 }
-                meaningWord = mRepository.findMeaning(where);
-                if (meaningWord.size() <= 0) {
+                mMeaningWord = mRepository.findMeaning(mWhere);
+                if (mMeaningWord.size() <= 0) {
                     Toast.makeText(getActivity(), "Not found ", Toast.LENGTH_SHORT).show();
-                } else {
-                    mWordAdapter = new WordAdapter(meaningWord);
-                    mRecyclerView.setAdapter(mWordAdapter);
                 }
+                updateUI();
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
             }
         });
+
 
         mReplace.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -146,8 +266,19 @@ public class BaseFragment extends Fragment implements AdapterView.OnItemSelected
                         mSpinnerDestination.setSelection(3);
                         break;
                 }
+
             }
         });
+    }
+
+    private void updateUI() {
+        if (mWordAdapter == null) {
+            mWordAdapter = new WordAdapter(mMeaningWord);
+            mRecyclerView.setAdapter(mWordAdapter);
+        } else {
+            mWordAdapter.setWords(mMeaningWord);
+            mWordAdapter.notifyDataSetChanged();
+        }
     }
 
 
@@ -223,21 +354,36 @@ public class BaseFragment extends Fragment implements AdapterView.OnItemSelected
     public class WordHolder extends RecyclerView.ViewHolder {
         private TextView mTextViewInput;
         private TextView mTextViewOutput;
+        private ImageView mImageViewShare;
+        private WordTranslate mWordTranslate;
 
         public WordHolder(@NonNull View itemView) {
             super(itemView);
             mTextViewInput = itemView.findViewById(R.id.input);
             mTextViewOutput = itemView.findViewById(R.id.output);
-
+            mImageViewShare = itemView.findViewById(R.id.imageView_share);
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-
+                    WordDetailDialogFragment wordDetailDialogFragment = WordDetailDialogFragment.newInstance(mWordTranslate);
+                    wordDetailDialogFragment.setTargetFragment(BaseFragment.this, REQUEST_CODE_WORD_DETAIL_DIALOG);
+                    wordDetailDialogFragment.show(getFragmentManager(), "wordDetailDialog");
+                }
+            });
+            mImageViewShare.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent sendIntent = new Intent(Intent.ACTION_SEND);
+                    sendIntent.putExtra(Intent.EXTRA_TEXT, getReportText(mWordTranslate));
+                    sendIntent.setType("text/plain");
+                    Intent share = Intent.createChooser(sendIntent, null);
+                    startActivity(share);
                 }
             });
         }
 
         public void wordBind(WordTranslate word) {
+            mWordTranslate = word;
             switch (mOriginState) {
                 case PERSIAN:
                     mTextViewInput.setText(word.getPersian());
@@ -267,6 +413,10 @@ public class BaseFragment extends Fragment implements AdapterView.OnItemSelected
                     break;
             }
         }
+    }
+
+    private String getReportText(WordTranslate word) {
+        return getString(R.string.share_word, word.getPersian(), word.getEnglish(), word.getFrance(), word.getArabian());
     }
 
     /**
