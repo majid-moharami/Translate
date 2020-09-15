@@ -79,10 +79,20 @@ public class BaseFragment extends Fragment implements AdapterView.OnItemSelected
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_base, container, false);
         findViews(view);
+        updateSubtitle();
+        setSpinnerOrigin();
+        setSpinnerDestination();
+        //allListener();
+        mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 1));
+        return view;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         if (savedInstanceState!=null){
             String origin = savedInstanceState.getString(SAVE_INSTANCE_ORIGIN_STATE);
             String des = savedInstanceState.getString(SAVE_INSTANCE_DES_STATE);
-            mEnterText.setText(savedInstanceState.getString(SAVE_ENTERED_TEXT));
             switch (origin){
                 case "PERSIAN" :
                     mOriginState=StateOfTranslate.PERSIAN;
@@ -104,11 +114,11 @@ public class BaseFragment extends Fragment implements AdapterView.OnItemSelected
             switch (des){
                 case "PERSIAN" :
                     mDesState=StateOfTranslate.PERSIAN;
-                    mSpinnerDestination.setSelection(0);
+                    mSpinnerDestination.setSelection(1);
                     break;
                 case "ENGLISH" :
                     mDesState=StateOfTranslate.ENGLISH;
-                    mSpinnerDestination.setSelection(1);
+                    mSpinnerDestination.setSelection(0);
                     break;
                 case "FRANCE" :
                     mDesState=StateOfTranslate.FRANCE;
@@ -119,18 +129,8 @@ public class BaseFragment extends Fragment implements AdapterView.OnItemSelected
                     mSpinnerDestination.setSelection(3);
                     break;
             }
-
-
-        }else {
-            updateSubtitle();
-            setSpinnerOrigin(view);
-            setSpinnerDestination(view);
+            mEnterText.setText(savedInstanceState.getString(SAVE_ENTERED_TEXT));
         }
-        allListener();
-
-
-        mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 1));
-        return view;
     }
 
     @Override
@@ -144,7 +144,8 @@ public class BaseFragment extends Fragment implements AdapterView.OnItemSelected
         super.onSaveInstanceState(outState);
         outState.putString(SAVE_INSTANCE_ORIGIN_STATE,mOriginState.toString());
         outState.putString(SAVE_INSTANCE_DES_STATE,mDesState.toString());
-        outState.putString(SAVE_ENTERED_TEXT,mEnterText.getText().toString());
+        String s = mEnterText.getText().toString();
+        outState.putString(SAVE_ENTERED_TEXT,s);
     }
 
     private void updateSubtitle() {
@@ -165,6 +166,7 @@ public class BaseFragment extends Fragment implements AdapterView.OnItemSelected
         if (requestCode == REQUEST_CODE_WORD_DETAIL_DIALOG) {
             mMeaningWord = mRepository.findMeaning(mWhere);
             updateUI();
+            updateSubtitle();
         }
     }
 
@@ -286,9 +288,8 @@ public class BaseFragment extends Fragment implements AdapterView.OnItemSelected
      * find the destination spinner and create Array adaptor for getting the item in spinner
      * and set adapter to spinner object
      *
-     * @param view
      */
-    private void setSpinnerDestination(View view) {
+    private void setSpinnerDestination() {
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getActivity(),
                 R.array.language_array2, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -300,9 +301,8 @@ public class BaseFragment extends Fragment implements AdapterView.OnItemSelected
      * find the origin spinner and create Array adaptor for getting the item in spinner
      * and set adapter to spinner object
      *
-     * @param view
      */
-    private void setSpinnerOrigin(View view) {
+    private void setSpinnerOrigin() {
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getActivity(),
                 R.array.language_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -327,7 +327,7 @@ public class BaseFragment extends Fragment implements AdapterView.OnItemSelected
                 mOriginState = StateOfTranslate.FRANCE;
             if (parent.getItemAtPosition(position).equals("Arabian"))
                 mOriginState = StateOfTranslate.ARABIAN;
-            mEnterText.setHint("enter the " + mOriginState.toString() + " word to translate");
+            mEnterText.setHint("Enter " + mOriginState.toString() + "");
         }
         if (parent.getId() == R.id.spinner_Destination) {
             if (parent.getItemAtPosition(position).equals("Persian"))

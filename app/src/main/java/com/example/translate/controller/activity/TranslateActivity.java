@@ -16,6 +16,6 @@ public class TranslateActivity extends AppCompatActivity {
         setContentView(R.layout.activity_translate);
 
         FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction().add(R.id.container_base_fragment, BaseFragment.newInstance()).commit();
+        fragmentManager.beginTransaction().replace(R.id.container_base_fragment, BaseFragment.newInstance()).commit();
     }
 }
